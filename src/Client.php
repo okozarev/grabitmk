@@ -28,6 +28,10 @@ class Client
     }
 
 
+    public function getClientId(){
+        return '';
+    }
+
 
 
     private function getProductionURL()
