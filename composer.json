@@ -5,15 +5,15 @@
 
     "require": {
       "php": "^7",
-      "grabitmk/omniship": "dev-master",
-        "infifni/grabitmk-client": "^1.0"
+      "grabitmk/omniship": "master",
+      "infifni/grabitmk-client": "^1.0"
     },
 
     "license": "LGPL-2.1",
 
     "autoload": {
       "psr-4": {
-        "Omniship\\GrabIT\\": "src"
+        "Omniship\\Grabitmk\\": "src"
       }
     },
 
