@@ -5,7 +5,7 @@
 
     "require": {
       "php": "^7",
-      "grabitmk/omniship": "master",
+      "grabitmk/omniship": "dev-master",
       "infifni/grabitmk-client": "^1.0"
     },
 
