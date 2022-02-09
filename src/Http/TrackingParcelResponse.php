@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniship\Grabitmk\Http;
+namespace Omniship\Acscourier\Http;
 use Omniship\Common\Component;
 use Omniship\Common\EventBag;
 use Omniship\Common\TrackingBag;

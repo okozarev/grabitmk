@@ -1,15 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: joro
- * Date: 10.5.2017 г.
- * Time: 16:55 ч.
- */
 
 namespace Omniship\Grabitmk\Http;
-
-use Infifni\GrabitmkApiClient\Client;
-
 class ValidateCredentialsRequest extends AbstractRequest
 {
 
@@ -20,8 +11,14 @@ class ValidateCredentialsRequest extends AbstractRequest
 
     public function sendData($data)
     {
-        $services = (new Client($this->getClientId(),$this->getUsername(),$this->getPassword()))->exportServices();
-        return $this->createResponse($services);
+        $data = [
+            "client_id" => "a0d0b525aa7666231e0ad0492197ad6d",
+            "client_secret" => "4582b8a909dd74a23830c62ad61887e3",
+            "username" => "d.dimovski@cloucart.com",
+            "password" => "1CLOUDcart#",
+            "grant_type" => "password"
+        ];
+        return $this->createResponse($this->getClient()->SendRequest($data));
     }
 
     protected function createResponse($data)

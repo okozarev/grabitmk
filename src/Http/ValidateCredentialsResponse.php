@@ -1,12 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: joro
- * Date: 10.5.2017 г.
- * Time: 17:22 ч.
- */
 
-namespace Omniship\Grabitmk\Http;
+namespace Omniship\Acscourier\Http;
 
 class ValidateCredentialsResponse extends AbstractResponse
 {
@@ -16,11 +10,10 @@ class ValidateCredentialsResponse extends AbstractResponse
      */
     public function getData()
     {
-        if(count($this->data) == 0) {
-            return false;
+        if(isset($this->data->ACSOutputResponce->ACSValueOutput) && !is_null($this->data->ACSOutputResponce->ACSValueOutput[0]->error_message)){
+            return $this->data->ACSOutputResponce->ACSValueOutput;
         }
-
-        return (bool)$this->data;
+        return true;
     }
 
 }

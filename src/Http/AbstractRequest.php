@@ -19,13 +19,30 @@ abstract class AbstractRequest extends BaseAbstractRequest implements RequestInt
         return 'mk';
     }
 
-    public function getClientId(){
+    public function getBaseUrl(){
 
-        return $this->getParameter('client_id');
+        return $this->getParameter('base_url');
     }
 
-    public function SetClientId($value){
-        return $this->setParameter('client_id', $value);
+    public function setBaseUrl($value){
+        return $this->setParameter('base_url', $value);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBarear()
+    {
+        return $this->getParameter('barear_token');
+    }
+
+    /**
+     * @param $value
+     * @return $this
+     */
+    public function setBarear($value)
+    {
+        return $this->setParameter('barear_token', $value);
     }
 
     /**

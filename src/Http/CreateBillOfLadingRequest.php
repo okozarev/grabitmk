@@ -1,9 +1,12 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * User: joro
+ * Date: 10.5.2017 г.
+ * Time: 16:55 ч.
+ */
 
-namespace  Omniship\Grabitmk\Http;
-
-use Infifni\GrabitmkApiClient\Client;
-use Infifni\GrabitmkApiClient\Request\GenerateAwb;
+namespace  Omniship\Acscourier\Http;
 
 class CreateBillOfLadingRequest extends AbstractRequest
 {
@@ -11,66 +14,64 @@ class CreateBillOfLadingRequest extends AbstractRequest
      * @return array
      */
     public function getData() {
-        if($this->getPackageType() == 'package'){
-            $envelope = 0;
-            $package = $this->getNumberOfPieces();
-        } else {
-            $envelope = $this->getNumberOfPieces();
-            $package = 0;
+        if($this->getPayer() == 'SENDER'){
+            $payer = 2;
+        } else{
+            $payer = 4;
         }
-        $PackageList = [];
-        foreach($this->getItems() as $items){
-            array_push($PackageList, $items->name.'/'.$items->name.'-'.$items->id.'/'.$items->id.'/'.$items->quantity.'/'.$items->price);
+        $addon = [];
+        if($this->getCashOnDeliveryAmount() != null && $this->getCashOnDeliveryAmount() > 0){
+            $addon[] = 'COD';
         }
-        $sender_address = $this->getSenderAddress();
-        $receiver_adress = $this->getReceiverAddress();
-        $options = [];
-        $check_at_delivery = $this->getOtherParameters('check_at_delivery') ? array_push($options, 'A') : $options;
-        $packing = $this->getOtherParameters('check_at_delivery') ? $packing_list = implode('|', $PackageList) : '';
-        $epod = $this->getOtherParameters('epod') ?   array_push($options, 'X') : $options;
-        $to_office = $receiver_adress->getOffice()  ?  array_push($options, 'D') : $options;
-        $saturday_delivery = $this->getOtherParameters('saturday_delivery') ?  array_push($options, 'S') : $options;
-        return [
-            'tip_serviciu' =>  $this->getServiceId(), // required
-            'banca' => '',
-            'iban' =>  '',
-            'nr_plicuri' =>  $envelope, // required
-            'nr_colete' => $package, // required
-            'greutate' => $this->getWeight(), // required
-            'plata_expeditie' => $this->getPayer(), // required
-            'ramburs_bani' =>  $this->getCashOnDeliveryAmount() ?? 0, // required 1
-            'plata_ramburs_la' => $this->getPayer(), // required
-            'valoare_declarata' => $this->getOtherParameters('declarate_value') ? $this->getDeclaredAmount() : '',
-            'persoana_contact_expeditor' => $sender_address->getFullName(),
-            'observatii' => $this->getOtherParameters('instructions') ?? '',
-            'continut' => $this->getClientNote() ?? '',
-            'nume_destinatar' =>  $receiver_adress->getFullName(), // required
-            'persoana_contact' => '',
-            'telefon' => $receiver_adress->getPhone(), // required
-            'fax' => '',
-            'email' => '',
-            'judet' => $receiver_adress->getState()->getName(), // required
-            'localitate' => $receiver_adress->getCity()->getName(), // required
-            'strada' => $receiver_adress->getStreet() ? $receiver_adress->getStreet()->getName() : $receiver_adress->getCity()->getName(), // required
-            'nr' => $receiver_adress->getStreetNumber() ?? '', // required
-            'cod_postal' => $receiver_adress->getPostCode(), // required
-            'bl' => $receiver_adress->getBuilding() ?? '',
-            'scara' => $receiver_adress->getEntrance() ?? '',
-            'etaj'  => $receiver_adress->getFloor() ?? '',
-            'apartament' => $receiver_adress->getApartment() ?? '',
-            'inaltime_pachet' => '',
-            'lungime_pachet' => '',
-            'restituire' => '',
-            'centru_cost' => '',
-            'optiuni' => implode('', $options),
-            'packing' => $packing,
-            'date_personale' => ''
-        ];
+        if($this->getInsuranceAmount() != null && $this->getInsuranceAmount() > 0){
+            $addon[] = 'INS';
+        }
+        $data = [
+            'ACSAlias' => 'ACS_Create_Voucher',
+            'ACSInputParameters' => [
+                'Company_ID' => $this->getCompanyId(),
+                'Company_Password' => $this->getCompanyPassword(),
+                'User_ID' => $this->getUsername(),
+                'User_Password' => $this->getPassword(),
+                'Billing_Code' => $this->getBillingCode(),
+                'Pickup_Date' => $this->getOtherParameters('pickup_date'),
+                'Sender' => $this->getSenderAddress()->getFullName(),
+                'Recipient_Name' => $this->getReceiverAddress()->getFullName(),
+                'Recipient_Address' => $this->getReceiverAddress()->getStreet()->getName(),
+                'Recipient_Address_Number' => $this->getReceiverAddress()->getStreetNumber(),
+                'Recipient_Zipcode' => $this->getReceiverAddress()->getPostCode(),
+                'Recipient_Region' => $this->getReceiverAddress()->getState()->getName(),
+                'Recipient_Phone' => $this->getReceiverAddress()->getPhone(),
+                'Recipient_Cell_Phone' => $this->getReceiverAddress()->getPhone(),
+                'Recipient_Floor' => $this->getReceiverAddress()->getFloor() ?? null,
+                'Recipient_Company_Name' => $this->getReceiverAddress()->getCompanyName(),
+                'Recipient_Country' => $this->getReceiverAddress()->getCountry()->getId(),
+                'Acs_Station_Destination' => null,
+                'Acs_Station_Branch_Destination' => null,
+                'Charge_Type' => $payer,
+                'Cost_Center_Code' => null,
+                'Item_Quantity' => 1,
+                'Weight' => $this->getWeight(),
+                'Dimension_X_In_Cm' => $this->getItems()->first()->getDepth(),
+                'Dimension_Y_in_Cm' => $this->getItems()->first()->getWidth(),
+                'Dimension_Z_in_Cm' => $this->getItems()->first()->getHeight(),
+                'Cod_Ammount' => $this->getCashOnDeliveryAmount(),
+                'Cod_Payment_Way' => 0,
+                'Acs_Delivery_Products' => implode(',', $addon),
+                'Insurance_Ammount' => $this->getInsuranceAmount(),
+                'Delivery_Notes' => $this->getReceiverAddress()->getNote(),
+                'Appointment_Until_Time' => null,
+                'Recipient_Email' => 'dasdas@abv.bg',
+                'Reference_Key1' => null,
+                'Reference_Key2' => null,
+                'With_Return_Voucher' => 1,
+                ]
+            ];
+        return $data;
     }
 
     public function sendData($data) {
-        $CreateBill = (new Client($this->getClientId(), $this->getUsername(), $this->getPassword()))->generateAwb(['fisier' => [$data]]);
-        return $this->createResponse($CreateBill);
+        return $this->createResponse($this->getClient()->SendRequest($data));
     }
 
     /**
@@ -79,7 +80,6 @@ class CreateBillOfLadingRequest extends AbstractRequest
      */
     protected function createResponse($data)
     {
-        $response = new CreateBillOfLadingResponse($this, $data);
         return $this->response = new CreateBillOfLadingResponse($this, $data);
     }
 

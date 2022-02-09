@@ -2,116 +2,66 @@
 
 namespace Omniship\Grabitmk;
 
-use App\Http\Controllers\Controller;
-use Infifni\Grabitmk\Client as ApiClient;
-use Omniship\Grabitmk\Lib\City;
-use Omniship\Grabitmk\Http\AbstractRequest;
-use Infifni\Grabitmk\Request\City as ApiCity;
-use Omniship\Grabitmk\Lib\Street;
+use GuzzleHttp\Client AS HttpClient;
+use http\Client\Response;
 use Omniship\Helper\Collection;
 
 class Client
 {
     protected $username;
     protected $password;
-    protected $client_id;
-    protected $client_secret;
-    protected $language;
     protected $error;
+    protected $base_url;
+    protected $barear_token;
+    protected $request_type;
 
-    public function __construct($username, $password, $client_id, $client_secret, $language)
+    const SERVICE_PRODUCTION_URL = '%s/';
+
+
+    public function __construct($username, $password, $base_url, $barear_token, $request_type)
     {
         $this->username = $username;
         $this->password = $password;
-        $this->client_id = $client_id;
-        $this->client_secret = $client_secret;
-        $this->language = $language;
+        $this->base_url = $base_url;
+        $this->barear_token = $barear_token;
+        $this->request_type = $request_type;
     }
 
-    protected $cityFields = [
-        'bg' => [
-            'city' => 'град',
-            'fan_city_id' => 'id_localitate_fan',
-            'county' => 'judet'
-        ],
-        'mk' => [
-            'city' => 'град',
-            'fan_city_id' => 'id_localitate_fan',
-            'county' => 'judet'
-        ],
-        'en' => [
-            'city' => 'city',
-            'fan_city_id' => 'fan_city_id',
-            'county' => 'county'
-        ]
-    ];
 
-    protected $streetFileds = [
-        'bg' => [
-            'street_id' => 'id_strada',
-            'county' => 'Държава',
-            'city' => 'Град',
-            'name' => 'улица',
-            'zipcode' => 'cod_postal',
-            'type' => 'тип'
-        ],
-        'mk' => [
-            'street_id' => 'id_strada',
-            'county' => 'Земја',
-            'city' => 'Град',
-            'name' => 'улица',
-            'zipcode' => 'cod_postal',
-            'type' => 'тип'
-        ],
-        'en' => [
-            'street_id' => 'street_id',
-            'county' => 'county',
-            'city' => 'city',
-            'name' => 'street',
-            'zipcode' => 'zip_code',
-            'type' => 'type'
 
-        ]
-    ];
 
-    public function getCities($zone = null, $name = null, $report_type = null)
+    private function getProductionURL()
     {
-        $collection = [];
-        $cities =(new ApiClient($this->client_id,$this->username,$this->password))->city([ 'language' => $this->language]);
-        if (!empty($cities) && !empty($cities)) {
-            $collection = array_map(function($city) {
-                return new City([
-                    'id' => $city[$this->cityFields[$this->language]['fan_city_id']],
-                    'name' => $city[$this->cityFields[$this->language]['city']],
-                    'state' => $city[$this->cityFields[$this->language]['county']]
-                ]);
-            },$cities);
-        }
-        return new Collection($collection);
+        return sprintf($this->SERVICE_PRODUCTION_URL, [$this->base_url]);
     }
 
-    public function getStreet($state = null, $local = null){
-        $collection = [];
-        $streets = (new ApiClient($this->client_id, $this->username, $this->password))->streets(['judet' => $state, 'localitate' => $local, 'language' =>  $this->language]);
-        $sttee_chunk = array_chunk($streets, 50);
-        if(!empty($streets)) {
-            $collection = array_map(function ($street) {
-                return [
-                    'id' => $street[$this->streetFileds[$this->language]['street_id']],
-                    'name' => $street[$this->streetFileds[$this->language]['name']],
-                    'zipcode' => $street[$this->streetFileds[$this->language]['zipcode']],
-                    'county' => $street[$this->streetFileds[$this->language]['county']],
-                    'city' => $street[$this->streetFileds[$this->language]['city']],
-                    'type' => $street[$this->streetFileds[$this->language]['type']]
-                ];
-            }, $streets);
-        }
-        return new Collection($collection);
-    }
 
 
     public function getError()
     {
         return $this->error;
     }
+
+
+
+    public function SendRequest($data = []){
+        try {
+            $client = new HttpClient(['base_uri' => $this->getProductionURL()]);
+            $response = $client->request($this->request_type, '', [
+                'json' => $data,
+                'headers' =>  [
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/vnd.api+json',
+                    'Authorization: Bearer '.$this->barear_token
+                ]
+            ]);
+            return json_decode($response->getBody()->getContents());
+        } catch (\Exception $e) {
+            $this->error = [
+                'code' => $e->getCode(),
+                'error' => $e->getError()->getResponse()->getBody()->getContents()
+            ];
+        }
+    }
+
 }
