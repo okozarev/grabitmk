@@ -5,8 +5,7 @@
 
     "require": {
       "php": "^7",
-      "grabitmk/omniship": "dev-master",
-      "infifni/grabitmk-client": "^1.0"
+      "grabitmk/omniship": "dev-master"
     },
 
     "license": "LGPL-2.1",
