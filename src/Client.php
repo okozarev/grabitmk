@@ -46,20 +46,58 @@ class Client
         return $this->error;
     }
 
+    public function LoginRequest(){
+        try {
+            $client = new HttpClient(['base_uri' => $this->getProductionURL()]);
+
+
+            $data = [
+                "client_id" => "a0d0b525aa7666231e0ad0492197ad6d",
+                "client_secret" => "4582b8a909dd74a23830c62ad61887e3",
+                "username" => $this->username,
+                "password" => $this->password,
+                "grant_type" => "password"
+            ];
+
+            $response = $client->request('POST', '', [
+                'json' => $data,
+                'headers' =>  [
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json'
+                ]
+            ]);
+
+            $resp = json_decode($response->getBody()->getContents());
+
+            dd($resp);
+
+        } catch (\Exception $e) {
+            $this->error = [
+                'code' => $e->getCode(),
+                'error' => $e->getError()->getResponse()->getBody()->getContents()
+            ];
+        }
+    }
 
 
     public function SendRequest($data = []){
         try {
+
+            $this::LoginRequest();
+
             $client = new HttpClient(['base_uri' => $this->getProductionURL()]);
+
             $response = $client->request($this->request_type, '', [
                 'json' => $data,
                 'headers' =>  [
                     'Content-Type' => 'application/json',
-                    'Accept' => 'application/vnd.api+json',
-                    'Authorization: Bearer '.$this->barear_token
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Bearer '.$this->barear_token
                 ]
             ]);
+
             return json_decode($response->getBody()->getContents());
+
         } catch (\Exception $e) {
             $this->error = [
                 'code' => $e->getCode(),

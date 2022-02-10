@@ -117,19 +117,27 @@ class Gateway extends AbstractGateway
     public function getClient()
     {
         if (is_null($this->client)) {
-            $this->client = new Client( $this->getUsername(), $this->getPassword(), $this->getBaseUrl(), $this->getBarearToken(), $this->getRequestType() );
+            $this->client = new Client(     $this->getUsername(),
+                                            $this->getPassword(),
+                                            $this->getBaseUrl(),
+                                            $this->getBarearToken(),
+                                            $this->getRequestType() );
         }
         return $this->client;
     }
 
+
+
     public function supportsValidateAddress()
     {
-        return true;
+        return false;
     }
     public function validateAddress(Address $address)
     {
         return $this->createRequest(ValidateAddressRequest::class, $this->setAddress($address)->getParameters());
     }
+
+
 
     public function supportsValidateCredentials()
     {
@@ -137,8 +145,11 @@ class Gateway extends AbstractGateway
     }
     public function validateCredentials(array $parameters = [])
     {
+        dd("121");
         return $this->createRequest(ValidateCredentialsRequest::class, $parameters);
     }
+
+
 
     public function supportsCreateBillOfLading()
     {
