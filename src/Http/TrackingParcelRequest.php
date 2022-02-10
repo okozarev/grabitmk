@@ -1,7 +1,6 @@
 <?php
 
 namespace Omniship\Grabitmk\Http;
-use Infifni\FanCourierApiClient\Client;
 
 
 class TrackingParcelRequest extends AbstractRequest
@@ -29,7 +28,6 @@ class TrackingParcelRequest extends AbstractRequest
 
     protected function createResponse($data)
     {
-        dd($data);
         return $this->response = new TrackingParcelResponse($this, $data);
     }
 }

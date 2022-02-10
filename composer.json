@@ -1,7 +1,7 @@
 {
     "name": "grabitmk/omniship-grabitmk",
 
-    "description": "PHP library to communicate with the MK logistics, power by GrabIT.",
+    "description": "PHP library to communicate with the MK logistics, powered by GrabIT.",
 
     "require": {
       "php": "^7",

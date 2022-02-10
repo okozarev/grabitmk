@@ -113,7 +113,6 @@ class Gateway extends AbstractGateway
     }
 
 
-
     public function getClient()
     {
         if (is_null($this->client)) {
@@ -145,7 +144,6 @@ class Gateway extends AbstractGateway
     }
     public function validateCredentials(array $parameters = [])
     {
-        dd("121");
         return $this->createRequest(ValidateCredentialsRequest::class, $parameters);
     }
 
@@ -197,13 +195,6 @@ class Gateway extends AbstractGateway
     {
         return $this->createRequest(GetPdfRequest::class, $this->setBolId($bol_id)->getParameters());
     }
-
-
-
-    public function getServices() { return ''; }
-    public function cancelBillOfLading() { return ''; }
-    public function trackingUrl() { return ''; }
-    public function codPayment() { return ''; }
 
 
 }

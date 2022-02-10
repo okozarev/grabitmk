@@ -14,29 +14,25 @@ class Client
     protected $base_url;
     protected $barear_token;
     protected $request_type;
+    protected $url_path;
 
     const SERVICE_PRODUCTION_URL = '%s/';
 
 
-    public function __construct($username, $password, $base_url, $barear_token, $request_type)
+    public function __construct($username, $password, $base_url, $barear_token, $request_type, $url_path)
     {
         $this->username = $username;
         $this->password = $password;
         $this->base_url = $base_url;
         $this->barear_token = $barear_token;
         $this->request_type = $request_type;
+        $this->url_path = $url_path;
     }
-
-
-    public function getClientId(){
-        return '';
-    }
-
 
 
     private function getProductionURL()
     {
-        return sprintf($this->SERVICE_PRODUCTION_URL, [$this->base_url]);
+        return sprintf($this::SERVICE_PRODUCTION_URL, $this->base_url);
     }
 
 
@@ -54,12 +50,12 @@ class Client
             $data = [
                 "client_id" => "a0d0b525aa7666231e0ad0492197ad6d",
                 "client_secret" => "4582b8a909dd74a23830c62ad61887e3",
-                "username" => $this->username,
+                "user_id" => $this->username,
                 "password" => $this->password,
                 "grant_type" => "password"
             ];
 
-            $response = $client->request('POST', '', [
+            $response = $client->request('POST', '/users/login', [
                 'json' => $data,
                 'headers' =>  [
                     'Content-Type' => 'application/json',
@@ -69,12 +65,13 @@ class Client
 
             $resp = json_decode($response->getBody()->getContents());
 
-            dd($resp);
+            return $resp['access_token'];
 
         } catch (\Exception $e) {
+            //dd($e);
             $this->error = [
                 'code' => $e->getCode(),
-                'error' => $e->getError()->getResponse()->getBody()->getContents()
+                'error' => $e->getMessage()
             ];
         }
     }
@@ -83,11 +80,11 @@ class Client
     public function SendRequest($data = []){
         try {
 
-            $this::LoginRequest();
+            $this->barear_token = $this->LoginRequest();
 
             $client = new HttpClient(['base_uri' => $this->getProductionURL()]);
 
-            $response = $client->request($this->request_type, '', [
+            $response = $client->request($this->request_type, $this->url_path, [
                 'json' => $data,
                 'headers' =>  [
                     'Content-Type' => 'application/json',
@@ -101,7 +98,7 @@ class Client
         } catch (\Exception $e) {
             $this->error = [
                 'code' => $e->getCode(),
-                'error' => $e->getError()->getResponse()->getBody()->getContents()
+                'error' => $e->getMessage()
             ];
         }
     }

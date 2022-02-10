@@ -10,8 +10,8 @@ class ValidateCredentialsResponse extends AbstractResponse
      */
     public function getData()
     {
-        if(isset($this->data->ACSOutputResponce->ACSValueOutput) && !is_null($this->data->ACSOutputResponce->ACSValueOutput[0]->error_message)){
-            return $this->data->ACSOutputResponce->ACSValueOutput;
+        if(isset($this->data)){
+            return $this->data;
         }
         return true;
     }
