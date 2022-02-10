@@ -58,7 +58,8 @@ class Gateway extends AbstractGateway
             'password' => '',
             'base_url' => '',
             'barear_token' => '',
-            'request_type' => ''
+            'request_type' => '',
+            'reqeust_url' => ''
         ];
     }
 
@@ -113,6 +114,18 @@ class Gateway extends AbstractGateway
     }
 
 
+    public function getRequestURI()
+    {
+        return $this->getParameter('reqeust_url');
+    }
+
+    public function setRequestURI($value)
+    {
+        return $this->setParameter('reqeust_url', $value);
+    }
+
+
+
     public function getClient()
     {
         if (is_null($this->client)) {
@@ -120,7 +133,8 @@ class Gateway extends AbstractGateway
                                             $this->getPassword(),
                                             $this->getBaseUrl(),
                                             $this->getBarearToken(),
-                                            $this->getRequestType() );
+                                            $this->getRequestType(),
+                                            $this->getRequestURI() );
         }
         return $this->client;
     }
