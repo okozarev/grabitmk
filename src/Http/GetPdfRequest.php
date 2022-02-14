@@ -1,5 +1,7 @@
 <?php
 namespace Omniship\Grabitmk\Http;
+use Omniship\Grabitmk\Client;
+
 
 class GetPdfRequest extends AbstractRequest
 {
@@ -7,18 +9,7 @@ class GetPdfRequest extends AbstractRequest
      * @return integer
      */
     public function getData() {
-        return [
-            'ACSAlias' => 'ACS_Print_Voucher',
-            'ACSInputParameters' => [
-                'Company_ID' => $this->getCompanyId(),
-                'Company_Password' => $this->getCompanyPassword(),
-                'User_ID' => $this->getUsername(),
-                'User_Password' => $this->getPassword(),
-                'Voucher_No' => $this->getBolId(),
-                'Print_Type' => 2,
-                'Start_Position' => 1
-            ]
-        ];
+        return [  ];
     }
 
     /**
@@ -26,7 +17,12 @@ class GetPdfRequest extends AbstractRequest
      * @return GetPdfResponse
      */
     public function sendData($data) {
-        return $this->createResponse($this->getClient()->SendRequest($data));
+
+        $params = $this->parameters->all();
+        $services = (new Client( $params['username'], $params['password'], $params['base_url'], '', "POST", '/pdf' )); //not avilable functionality
+        $services = $services->SendRequest( $this->getData() );
+        return $this->createResponse($services);
+
     }
 
     /**

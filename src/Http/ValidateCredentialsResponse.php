@@ -10,10 +10,10 @@ class ValidateCredentialsResponse extends AbstractResponse
      */
     public function getData()
     {
-        if(isset($this->data)){
+        if($this->data){
             return $this->data;
         }
-        return true;
+        return false;
     }
 
 }

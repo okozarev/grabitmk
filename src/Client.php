@@ -3,8 +3,8 @@
 namespace Omniship\Grabitmk;
 
 use GuzzleHttp\Client AS HttpClient;
-use http\Client\Response;
-use Omniship\Helper\Collection;
+//use http\Client\Response;
+//use Omniship\Helper\Collection;
 
 class Client
 {
@@ -15,6 +15,8 @@ class Client
     protected $barear_token;
     protected $request_type;
     protected $url_path;
+    protected $cust_id;
+    protected $cust_name;
 
     const SERVICE_PRODUCTION_URL = '%s/';
 
@@ -46,11 +48,10 @@ class Client
         try {
             $client = new HttpClient(['base_uri' => $this->getProductionURL()]);
 
-
             $data = [
                 "client_id" => "a0d0b525aa7666231e0ad0492197ad6d",
                 "client_secret" => "4582b8a909dd74a23830c62ad61887e3",
-                "user_id" => $this->username,
+                "username" => $this->username,
                 "password" => $this->password,
                 "grant_type" => "password"
             ];
@@ -63,9 +64,13 @@ class Client
                 ]
             ]);
 
-            $resp = json_decode($response->getBody()->getContents());
+            $resp = json_decode( $response->getBody()->getContents() );
 
-            return $resp['access_token'];
+            $this->barear_token = $resp->access_token;
+            $this->cust_id = $resp->client_id;
+            $this->cust_name = $resp->client_name;
+
+            return $resp;
 
         } catch (\Exception $e) {
             //dd($e);
@@ -80,20 +85,30 @@ class Client
     public function SendRequest($data = []){
         try {
 
-            $this->barear_token = $this->LoginRequest();
+            $login = $this->LoginRequest();
 
-            $client = new HttpClient(['base_uri' => $this->getProductionURL()]);
+            //if only login requested - go to the ELSE part and move on
+            if( $this->url_path ){
+                $client = new HttpClient(['base_uri' => $this->getProductionURL()]);
 
-            $response = $client->request($this->request_type, $this->url_path, [
-                'json' => $data,
-                'headers' =>  [
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                    'Authorization' => 'Bearer '.$this->barear_token
-                ]
-            ]);
+                $response = $client->request($this->request_type, $this->url_path, [
+                    'json' => $data,
+                    'headers' =>  [
+                        'Content-Type' => 'application/json',
+                        'Accept' => 'application/json',
+                        'Authorization' => 'Bearer '.$login->access_token
+                    ]
+                ]);
 
-            return json_decode($response->getBody()->getContents());
+                $resp = json_decode($response->getBody()->getContents());
+                $resp[0]->cust_id = $this->cust_id;
+                $resp[0]->cust_name = $this->cust_name;
+                return $resp;
+
+            }else{
+                //dd($login);
+                return $login->access_token;
+            }
 
         } catch (\Exception $e) {
             $this->error = [
