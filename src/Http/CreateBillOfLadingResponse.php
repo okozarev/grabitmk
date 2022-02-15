@@ -15,6 +15,7 @@ class CreateBillOfLadingResponse extends AbstractResponse
         if((int)$this->data == 0) {
             return false;
         }
+
         return $this->data;
     }
 

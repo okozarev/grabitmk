@@ -1,13 +1,43 @@
 <?php
 
 namespace Omniship\Grabitmk\Http;
+
+use Google\Service\CloudSearch\PushItem;
 use Omniship\Grabitmk\Client;
+use PhpParser\Node\Expr\Cast\Array_;
 
 class ShippingQuoteRequest extends AbstractRequest
 {
 
     public function getData()
     {
+
+        if($this->getPayer() == 'SENDER'){
+            $payer = 1;
+        } else{
+            $payer = 2;
+        }
+
+
+        $data = [];
+        $data["pickup_city"] = "Дебар";
+        $data["pickup_address"] = "Скопска 1, Дебар";
+        $data["pickup_zip"] = "1250";
+        //$data["pickup_hub_id"] = "";
+        $data["recipient_id"] = 2;
+        $data["delivery_city"] = "Karposh, Skopje";
+        $data["delivery_address"] = "Neveska 1 2/10";
+        $data["delivery_zip"] = "1001";
+        //$data["delivery_hub_id"] = "";
+        $data["product_id"] = 1;
+        $data["return_document"] = 0;
+        $data["weight"] = 11;
+        $data["cod_amount"] =1324;
+        $data["shipping_payer"] = $payer;
+        $data["redemption_payer"] = 2;
+        $data["return_document_payer"] = 2;
+        $data["insurance_payer"] = 2;
+
         return [
             "pickup_city" => "Дебар",
             "delivery_city" => "Дебар",
@@ -42,8 +72,8 @@ class ShippingQuoteRequest extends AbstractRequest
     public function sendData($data)
     {
         $params = $this->parameters->all();
-        $services = (new Client( $params['username'], $params['password'], $params['base_url'], '', "POST", '/orders/calculator' ));
-        $services = $services->SendRequest( $this->getData() );
+        $services = (new Client( $params['username'], $params['password'], $params['base_url'] ));
+        $services = $services->SendRequest( $this->getData(), 'POST', '/orders/calculator');
         return $this->createResponse($services);
     }
 

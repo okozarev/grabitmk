@@ -21,23 +21,12 @@ class Client
     const SERVICE_PRODUCTION_URL = '%s/';
 
 
-    public function __construct($username, $password, $base_url, $barear_token, $request_type, $url_path)
+    public function __construct($username, $password, $base_url)
     {
         $this->username = $username;
         $this->password = $password;
         $this->base_url = $base_url;
-        $this->barear_token = $barear_token;
-        $this->request_type = $request_type;
-        $this->url_path = $url_path;
     }
-
-
-    private function getProductionURL()
-    {
-        return sprintf($this::SERVICE_PRODUCTION_URL, $this->base_url);
-    }
-
-
 
     public function getError()
     {
@@ -46,7 +35,7 @@ class Client
 
     public function LoginRequest(){
         try {
-            $client = new HttpClient(['base_uri' => $this->getProductionURL()]);
+            $client = new HttpClient(['base_uri' => $this->base_url]);
 
             $data = [
                 "client_id" => "a0d0b525aa7666231e0ad0492197ad6d",
@@ -81,17 +70,15 @@ class Client
         }
     }
 
-
-    public function SendRequest($data = []){
+    public function SendRequest($data = [], $method = 'POST', $path = null){
         try {
-
             $login = $this->LoginRequest();
 
             //if only login requested - go to the ELSE part and move on
-            if( $this->url_path ){
-                $client = new HttpClient(['base_uri' => $this->getProductionURL()]);
+            if($path){
+                $client = new HttpClient(['base_uri' => $this->base_url]);
 
-                $response = $client->request($this->request_type, $this->url_path, [
+                $response = $client->request($method, $path, [
                     'json' => $data,
                     'headers' =>  [
                         'Content-Type' => 'application/json',
@@ -103,10 +90,10 @@ class Client
                 $resp = json_decode($response->getBody()->getContents());
                 $resp[0]->cust_id = $this->cust_id;
                 $resp[0]->cust_name = $this->cust_name;
+                
                 return $resp;
 
             }else{
-                //dd($login);
                 return $login->access_token;
             }
 
@@ -116,6 +103,12 @@ class Client
                 'error' => $e->getMessage()
             ];
         }
+    }
+
+    public function getOffices(){
+        $offices = $this->SendRequest('', 'GET','droppoints');
+        return $offices;
+
     }
 
 }

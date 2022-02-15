@@ -11,11 +11,11 @@ class ShippingQuoteResponse extends AbstractResponse
 
         foreach ($this->data as $data){
             $result->push([
-                'id' => 1,
-                'name' => $data->cust_name,
-                'description' => null,
+                'customer_id' => $data->customer_id,
+                'name' => '',
+                'description' => $data->description,
                 'price' => (float)$data->price,
-                'pickup_date' => null,
+                'unit_price' => (float)$data->unit_price,
                 'pickup_time' => null,
                 'delivery_date' => null,
                 'delivery_time' => null,
@@ -24,9 +24,9 @@ class ShippingQuoteResponse extends AbstractResponse
                 'insurance' => 0,
                 'exchange_rate' => 1,
                 'payer' =>null,
-                'allowance_fixed_time_delivery' => false,
-                'allowance_cash_on_delivery' => true,
-                'allowance_insurance' => true,
+                'service_id' => $data->service_id,
+                'service_name' => $data->service_name,
+                'created' => $data->created
             ]);
         }
         return $result;
