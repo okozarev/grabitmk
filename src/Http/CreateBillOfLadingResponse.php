@@ -12,11 +12,20 @@ class CreateBillOfLadingResponse extends AbstractResponse
      */
     public function getData()
     {
-        if((int)$this->data == 0) {
-            return false;
+        if(empty($this->data)){
+            return $this->error;
         }
+        $data = collect($this->data);
+        $payments = collect($data['payments']);
+        $sum = $payments->sum('price');
 
-        return $this->data;
+        $result = new Create();
+        $result->setBolId($data['serialNumber']);
+        $result->setBillOfLadingSource($data['labelUrl']);
+        $result->setBillOfLadingUrl($data['labelUrl']);
+        $result->setBillOfLadingType($result::PDF);
+        $result->setTotal($sum);
+        return $result;
     }
 
 }

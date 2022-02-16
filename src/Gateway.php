@@ -4,6 +4,7 @@ namespace Omniship\Grabitmk;
 
 use Carbon\Carbon;
 
+use Omniship\Grabitmk\Http\CancelBillOfLadingRequest;
 use Omniship\Grabitmk\Http\CreateBillOfLadingRequest;
 use Omniship\Grabitmk\Http\GetPdfRequest;
 use Omniship\Grabitmk\Http\TrackingParcelRequest;
@@ -124,49 +125,68 @@ class Gateway extends AbstractGateway
         return $this->setParameter('reqeust_url', $value);
     }
 
+    public function setBackDocuments($value)
+    {
+        return $this->setParameter('back_documents', $value);
+    }
 
+    public function getBackDocuments()
+    {
+        return $this->getParameter('back_documents');
+    }
+
+    public function setSendType($value)
+    {
+        return $this->setParameter('send_type', $value);
+    }
+
+    public function getSendType()
+    {
+        return $this->getParameter('send_type');
+    }
 
     public function getClient()
     {
         if (is_null($this->client)) {
-            $this->client = new Client(     $this->getUsername(),
-                                            $this->getPassword(),
-                                            $this->getBaseUrl(),
-                                            $this->getBarearToken(),
-                                            $this->getRequestType(),
-                                            $this->getRequestURI() );
+            $this->client = new Client($this->getUsername(),
+                $this->getPassword(),
+                $this->getBaseUrl(),
+                $this->getBarearToken(),
+                $this->getRequestType(),
+                $this->getRequestURI());
         }
         return $this->client;
     }
-
 
 
     public function supportsValidateAddress()
     {
         return false;
     }
+
     public function validateAddress(Address $address)
     {
         return $this->createRequest(ValidateAddressRequest::class, $this->setAddress($address)->getParameters());
     }
 
 
-
     public function supportsValidateCredentials()
     {
         return true;
     }
+
     public function validateCredentials(array $parameters = [])
     {
+
         return $this->createRequest(ValidateCredentialsRequest::class, $parameters);
     }
-
 
 
     public function supportsCreateBillOfLading()
     {
         return true;
     }
+
     public function createBillOfLading($parameters = [])
     {
         if ($parameters instanceof CreateBillOfLadingRequest) {
@@ -209,6 +229,18 @@ class Gateway extends AbstractGateway
     {
         return $this->createRequest(GetPdfRequest::class, $this->setBolId($bol_id)->getParameters());
     }
+
+    /**
+     * @param $bol_id
+     * @param null $cancelComment
+     * @return CancelBillOfLadingRequest
+     */
+    public function cancelBillOfLading($bol_id, $cancelComment = null)
+    {
+        $this->setBolId($bol_id);
+        return $this->createRequest(CancelBillOfLadingRequest::class, $this->getParameters());
+    }
+
 
 
 }

@@ -21,10 +21,11 @@ class Client
     const SERVICE_PRODUCTION_URL = '%s/';
 
 
-    public function __construct($username, $password, $base_url)
+    public function __construct($username, $password, $base_url, $barear_token)
     {
         $this->username = $username;
         $this->password = $password;
+        $this->barear_token = $barear_token;
         $this->base_url = $base_url;
     }
 
@@ -62,7 +63,6 @@ class Client
             return $resp;
 
         } catch (\Exception $e) {
-            //dd($e);
             $this->error = [
                 'code' => $e->getCode(),
                 'error' => $e->getMessage()
@@ -74,6 +74,9 @@ class Client
         try {
             $login = $this->LoginRequest();
 
+            if(isset($data['sender_id'])){
+                $data['sender_id'] = $login->client_id;
+            }
             //if only login requested - go to the ELSE part and move on
             if($path){
                 $client = new HttpClient(['base_uri' => $this->base_url]);
@@ -88,9 +91,11 @@ class Client
                 ]);
 
                 $resp = json_decode($response->getBody()->getContents());
-                $resp[0]->cust_id = $this->cust_id;
-                $resp[0]->cust_name = $this->cust_name;
-                
+             //   dd($resp);
+                if(empty($path)) {
+                    $resp[0]->cust_id = $this->cust_id;
+                    $resp[0]->cust_name = $this->cust_name;
+                }
                 return $resp;
 
             }else{
@@ -98,6 +103,7 @@ class Client
             }
 
         } catch (\Exception $e) {
+           dd($e->getMessage());
             $this->error = [
                 'code' => $e->getCode(),
                 'error' => $e->getMessage()

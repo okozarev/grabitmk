@@ -19,8 +19,8 @@ class GetPdfRequest extends AbstractRequest
     public function sendData($data) {
 
         $params = $this->parameters->all();
-        $services = (new Client( $params['username'], $params['password'], $params['base_url'], '', "POST", '/pdf' )); //not avilable functionality
-        $services = $services->SendRequest( $this->getData() );
+        $services = (new Client( $params['username'], $params['password'], $params['base_url'], '')); //not avilable functionality
+        $services = $services->SendRequest( $this->getData(), "GET", '/orders' );
         return $this->createResponse($services);
 
     }
@@ -31,6 +31,7 @@ class GetPdfRequest extends AbstractRequest
      */
     protected function createResponse($data)
     {
+        dd($data);
         return $this->response = new GetPdfResponse($this, $data);
     }
 
