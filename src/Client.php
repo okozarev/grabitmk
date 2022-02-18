@@ -3,8 +3,9 @@
 namespace Omniship\Grabitmk;
 
 use GuzzleHttp\Client AS HttpClient;
-//use http\Client\Response;
-//use Omniship\Helper\Collection;
+use App\Exceptions\Error;
+use http\Client\Response;
+use Omniship\Helper\Collection;
 
 class Client
 {
@@ -29,6 +30,9 @@ class Client
         $this->base_url = $base_url;
     }
 
+    /**
+     * @return mixed
+     */
     public function getError()
     {
         return $this->error;
@@ -63,7 +67,7 @@ class Client
             return $resp;
 
         } catch (\Exception $e) {
-            $this->error = [
+             $this->error = [
                 'code' => $e->getCode(),
                 'error' => $e->getMessage()
             ];
@@ -91,7 +95,6 @@ class Client
                 ]);
 
                 $resp = json_decode($response->getBody()->getContents());
-             //   dd($resp);
                 if(empty($path)) {
                     $resp[0]->cust_id = $this->cust_id;
                     $resp[0]->cust_name = $this->cust_name;
@@ -103,10 +106,9 @@ class Client
             }
 
         } catch (\Exception $e) {
-           dd($e->getMessage());
-            $this->error = [
+           return $this->error = [
                 'code' => $e->getCode(),
-                'error' => $e->getMessage()
+                'error' => $e->getResponse()->getBody()->getContents()
             ];
         }
     }

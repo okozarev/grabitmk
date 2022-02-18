@@ -18,25 +18,34 @@ class CreateBillOfLadingRequest extends AbstractRequest
             $payer = 2;
         }
 
-
         $data = [];
         $data['sender_id'] = '';
         $data["pickup_city"] = $this->getSenderAddress()->getCity()->getName();
         if($this->getOtherParameters('send_type') == 'address'){
-            $data['pickup_address'] = $this->getOtherParameters('sender_address');
+            $data['pickup_address'] =  $this->getSenderAddress()->getStreet()->getName();
         }
         $data['pickup_zip'] = $this->getSenderAddress()->getcity()->getPostCode();
         if($this->getOtherParameters('send_type') == 'office'){
             $data['pickup_hub_id'] = $this->getSenderAddress()->getOffice()->getId();
+         //   $data['pickup_address'] = $this->getSenderAddress->getOffice()-->getAdree;
         }
         $data["recipient_id"] = 2;
         if (!empty($this->getReceiverAddress()->getOffice())) {
             $data["delivery_address"] = $this->getReceiverAddress()->getOffice()->getAddressString();
             $data["delivery_hub_id"] = $this->getReceiverAddress()->getOffice()->getId();
+        } else {
+            $get_street_name = !empty($this->getReceiverAddress()->getStreet()) ? $this->getReceiverAddress()->getStreet()->getName() : '';
+            if (!empty($get_street_name)) {
+                $street_number = !empty($this->getReceiverAddress()->getStreetNumber()) ? $this->getReceiverAddress()->getStreetNumber() : '';
+                $rec_address = $get_street_name . ' ' . $street_number;
+            } else {
+                $rec_address = '';
+            }
+            $data['delivery_address'] = $rec_address;
         }
         $data["delivery_city"] = $this->getReceiverAddress()->getCity()->getName();
         $data["delivery_zip"] = $this->getReceiverAddress()->getPostCode();
-        $data["delivery_address"] = $this->getReceiverAddress()->getText();
+
         $data["product_id"] = $this->getOtherParameters('type_product') == 'package' ? 1 : 2;
         $data["return_document"] = $this->getOtherParameters('return_documents');
         if ($data['return_document'] == 1) {
@@ -54,7 +63,6 @@ class CreateBillOfLadingRequest extends AbstractRequest
         $data["shipping_payer"] =(string)$payer;
         $data["redemption_payer"] = (string)$payer;
         $data["insurance_payer"] = (string)$payer;
-    //    dd($data);
         return $data;
     }
 
